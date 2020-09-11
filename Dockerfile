@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     libcairo2-dev \
     libxt-dev \
     libssl-dev \
-    libssh2-1-dev
+    libssh2-1-dev \
+    wget
 
 # Add shiny user
 
@@ -18,21 +19,26 @@ RUN apt-get update && apt-get install -y \
 RUN R -e "install.packages('shiny', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('shinydashboard', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('plotly', repos='http://cran.rstudio.com/')"
-RUN R -e "install.packages('tidyverse', repos='http://cran.rstudio.com/')"
-RUN R -e "install.packages('lubridate', repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages('tidyverse', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+RUN R -e "install.packages('RSQLite', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+RUN R -e "install.packages('DBI', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+RUN R -e "install.packages('dplyr', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+RUN R -e "install.packages('magrittr', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+RUN R -e "install.packages('ggplot2', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+RUN R -e "install.packages('shinythemes', repos='http://cran.rstudio.com/',dependencies=TRUE)"
+
 
 
 # copy the app to the image
 COPY shiny-server.sh /usr/bin/shiny-server.sh
 COPY app.R /srv/shiny-server
-#COPY data /srv/shiny-server
+COPY data /srv/shiny-server/data/
 
 # select port
 EXPOSE 3838
 
 # allow permission
 RUN ["chmod", "+x", "/usr/bin/shiny-server.sh"]
-
 
 # run app
 CMD ["/usr/bin/shiny-server.sh"]
